@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Full Interactive Python Learning Platform</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    background: #eef4ff;
+    padding: 28px;
+    color: #0a2540;
+  }
+  h1 {
+    text-align: center;
+    color: #1a73e8;
+    margin-bottom: 36px;
+  }
+  #exercise {
+    background-color: #dbe7ff;
+    border-radius: 16px;
+    padding: 26px;
+    margin-bottom: 28px;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0b3d91;
+    box-shadow: 0 8px 20px rgba(26, 115, 232, 0.24);
+  }
+  textarea {
+    width: 100%;
+    height: 210px;
+    padding: 22px;
+    font-size: 1.3rem;
+    border-radius: 16px;
+    border: 3px solid #b1c2ff;
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 30px;
+    transition: border-color 0.3s ease;
+  }
+  textarea:focus {
+    border-color: #1a73e8;
+    outline: none;
+    box-shadow: 0 0 10px #1a73e8bb;
+  }
+  button {
+    padding: 16px 44px;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-right: 20px;
+    background-color: #1a73e8;
+    color: white;
+    box-shadow: 0 9px 17px rgba(26, 115, 232, 0.38);
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #155abb;
+  }
+  #output {
+    background-color: #e5eeff;
+    border-radius: 16px;
+    color: #122a64;
+    min-height: 160px;
+    padding: 32px;
+    font-family: monospace;
+    font-size: 1.35rem;
+    box-shadow: inset 0 0 16px #b9cdfd;
+    white-space: pre-wrap;
+    margin-top: 32px;
+    overflow-x: auto;
+  }
+  .error {
+    color: #b71c1c;
+    font-weight: 900;
+    margin-top: 22px;
+  }
+  .tips {
+    color: #1f4d1f;
+    background: #d6f0d6;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 22px;
+    font-weight: 800;
+  }
+  @media(max-width: 600px) {
+    textarea {
+      height: 140px;
+      font-size: 1rem;
+    }
+    button {
+      font-size: 1rem;
+      padding: 12px 28px;
+      margin-bottom: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Full Interactive Python Learning Platform</h1>
+
+<div id="exercise"></div>
+
+<textarea id="codeArea" placeholder="Type your Python code here..."></textarea>
+
+<div>
+  <button id="runCodeBtn">Run Code</button>
+  <button id="newExerciseBtn">New Exercise</button>
+  <button id="showSolutionBtn">Show Solution</button>
+</div>
+
+<div id="output"></div>
+
+<!-- Skulpt library from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/skulpt-stdlib.js"></script>
+
+<script>
+  const exercises = [
+    {
+      description: "Print numbers from 1 to 5 using a for loop.",
+      solution: "for i in range(1, 6):\n    print(i)"
+    },
+    {
+      description: "Write a function add(a, b) that returns the sum of a and b.",
+      solution: "def add(a, b):\n    return a + b"
+    },
+    {
+      description: "Print \"Hello World\" if x equals 7.",
+      solution: "x = 7\nif x == 7:\n    print(\"Hello World\")"
+    }
+  ];
+
+  let currentExercise = null;
+
+  const outputEl = document.getElementById("output");
+  const codeArea = document.getElementById("codeArea");
+
+  function loadRandomExercise() {
+    currentExercise = exercises[Math.floor(Math.random() * exercises.length)];
+    document.getElementById("exercise").textContent = "Exercise: " + currentExercise.description;
+    codeArea.value = "";
+    clearOutput();
+  }
+
+  function clearOutput() {
+    outputEl.textContent = "";
+    outputEl.classList.remove("error");
+    outputEl.classList.remove("tips");
+  }
+
+  // Basic code syntax analyzer for common mistakes
+  function analyzeCode(code) {
+    const errors = [];
+    const tips = [];
+
+    if (!code.trim()) {
+      errors.push("Code cannot be empty.");
+    }
+    if (code.includes("print") && !code.includes("(")) {
+      errors.push("Use parentheses with print(), for example: print('Hello')");
+      tips.push("Example: print('Hello')");
+    }
+    const lines = code.split("\n");
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if ((trimmed.startsWith("for ") || trimmed.startsWith("if ") || trimmed.startsWith("def ")) && !trimmed.endsWith(":")) {
+        errors.push(`Line '${trimmed}' should end with a colon ':'`);
+        tips.push("Add ':' at the end of the line.");
+      }
+    });
+
+    return { errors, tips };
+  }
+
+  function runCode() {
+    clearOutput();
+    const code = codeArea.value;
+    const analysis = analyzeCode(code);
+
+    if (analysis.errors.length > 0) {
+      outputEl.classList.add("error");
+      outputEl.textContent = "Errors found:\n" + analysis.errors.map(e => "• " + e).join("\n");
+      if (analysis.tips.length) {
+        outputEl.classList.add("tips");
+        outputEl.textContent += "\n\nTips:\n" + analysis.tips.map(t => "• " + t).join("\n");
+      }
+      return;
+    }
+
+    Sk.configure({
+      output: (text) => { outputEl.textContent += text; },
+      read: (filename) => {
+        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][filename] === undefined) {
+          throw "File not found: '" + filename + "'";
+        }
+        return Sk.builtinFiles["files"][filename];
+      }
+    });
+
+    Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
+      .catch(err => {
+        outputEl.classList.add("error");
+        outputEl.textContent = "Runtime Error:\n" + err.toString();
+      });
+  }
+
+  function showSolution() {
+    if (currentExercise) {
+      alert("Solution:\n\n" + currentExercise.solution);
+    } else {
+      alert("No exercise loaded.");
+    }
+  }
+
+  document.getElementById("runCodeBtn").addEventListener("click", runCode);
+  document.getElementById("newExerciseBtn").addEventListener("click", loadRandomExercise);
+  document.getElementById("showSolutionBtn").addEventListener("click", showSolution);
+  
+  window.onload = loadRandomExercise;
+</script>
+
+</body>
+</html>
