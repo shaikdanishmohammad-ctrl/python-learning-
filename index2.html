@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Full Interactive Python Learning Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Python Learning Platform on GitHub Pages</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -101,11 +102,11 @@
 </head>
 <body>
 
-<h1>Full Interactive Python Learning Platform</h1>
+<h1>Python Learning Platform (GitHub Pages Friendly)</h1>
 
 <div id="exercise"></div>
 
-<textarea id="codeArea" placeholder="Type your Python code here..."></textarea>
+<textarea id="codeArea" placeholder="Write your Python code here..."></textarea>
 
 <div>
   <button id="runCodeBtn">Run Code</button>
@@ -115,7 +116,6 @@
 
 <div id="output"></div>
 
-<!-- Skulpt library from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/skulpt-stdlib.js"></script>
 
@@ -153,7 +153,6 @@
     outputEl.classList.remove("tips");
   }
 
-  // Basic code syntax analyzer for common mistakes
   function analyzeCode(code) {
     const errors = [];
     const tips = [];
@@ -162,11 +161,10 @@
       errors.push("Code cannot be empty.");
     }
     if (code.includes("print") && !code.includes("(")) {
-      errors.push("Use parentheses with print(), for example: print('Hello')");
+      errors.push("Use parentheses with print(), e.g., print('Hello')");
       tips.push("Example: print('Hello')");
     }
-    const lines = code.split("\n");
-    lines.forEach(line => {
+    code.split("\n").forEach(line => {
       const trimmed = line.trim();
       if ((trimmed.startsWith("for ") || trimmed.startsWith("if ") || trimmed.startsWith("def ")) && !trimmed.endsWith(":")) {
         errors.push(`Line '${trimmed}' should end with a colon ':'`);
@@ -182,9 +180,9 @@
     const code = codeArea.value;
     const analysis = analyzeCode(code);
 
-    if (analysis.errors.length > 0) {
+    if (analysis.errors.length) {
       outputEl.classList.add("error");
-      outputEl.textContent = "Errors found:\n" + analysis.errors.map(e => "• " + e).join("\n");
+      outputEl.textContent = "Errors detected:\n" + analysis.errors.map(e => "• " + e).join("\n");
       if (analysis.tips.length) {
         outputEl.classList.add("tips");
         outputEl.textContent += "\n\nTips:\n" + analysis.tips.map(t => "• " + t).join("\n");
@@ -193,9 +191,9 @@
     }
 
     Sk.configure({
-      output: (text) => { outputEl.textContent += text; },
-      read: (filename) => {
-        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][filename] === undefined) {
+      output: text => { outputEl.textContent += text; },
+      read: filename => {
+        if (!Sk.builtinFiles || !Sk.builtinFiles["files"][filename]) {
           throw "File not found: '" + filename + "'";
         }
         return Sk.builtinFiles["files"][filename];
@@ -220,9 +218,16 @@
   document.getElementById("runCodeBtn").addEventListener("click", runCode);
   document.getElementById("newExerciseBtn").addEventListener("click", loadRandomExercise);
   document.getElementById("showSolutionBtn").addEventListener("click", showSolution);
-  
+
   window.onload = loadRandomExercise;
 </script>
 
 </body>
 </html>
+
+  
+
+
+
+ 
+    
